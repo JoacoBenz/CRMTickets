@@ -36,19 +36,30 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-canvas px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
-          <div className="mb-2 inline-flex items-center gap-2">
-            <span className="inline-block h-3 w-3 rounded-full bg-brand" />
-            <span className="font-display text-xl font-bold">Resguardo</span>
+      <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-card">
+        {/* Banda oscura estilo talón */}
+        <div
+          className="px-6 pb-7 pt-6 text-white"
+          style={{
+            background:
+              "linear-gradient(150deg, #262a45 0%, #1B1D29 60%, #16171e 100%)",
+          }}
+        >
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/60">
+            <span className="inline-block h-2 w-2 rounded-full bg-brand" />
+            Resguardo · Custodia
           </div>
-          <p className="text-sm text-[#6A6E7E]">Panel de administración</p>
+          <h1 className="mt-2 font-display text-2xl font-bold">
+            Panel de administración
+          </h1>
+        </div>
+        <div className="relative">
+          <div className="perf-line-light mx-6" />
+          <span className="perf-notch-light left" aria-hidden />
+          <span className="perf-notch-light right" aria-hidden />
         </div>
 
-        <form
-          onSubmit={onSubmit}
-          className="space-y-4 rounded-2xl bg-white p-6 shadow-card"
-        >
+        <form onSubmit={onSubmit} className="space-y-4 p-6">
           <div>
             <label
               htmlFor="email"

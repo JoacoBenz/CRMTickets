@@ -14,6 +14,9 @@ html {
 
 body {
   background-color: #eaebf0;
+  /* Trama de puntos sutil para despegar del fondo plano típico de dashboard */
+  background-image: radial-gradient(rgba(91, 75, 224, 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
   color: #1b1d29;
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -24,6 +27,37 @@ body {
   outline: 2px solid #5b4be0;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Sello estampado: doble borde, rotado, tipo goma de escribanía */
+.stamp {
+  transform: rotate(-3deg);
+  border: 3px solid currentColor;
+  border-radius: 14px;
+  outline: 1.5px solid currentColor;
+  outline-offset: 5px;
+  text-transform: uppercase;
+}
+
+/* Troquelado claro (separadores dentro de cards blancas) */
+.perf-line-light {
+  position: relative;
+  border-top: 2px dashed #e3e5ed;
+}
+.perf-notch-light {
+  position: absolute;
+  top: -11px;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background-color: #eaebf0;
+  box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+.perf-notch-light.left {
+  left: -10px;
+}
+.perf-notch-light.right {
+  right: -10px;
 }
 
 /* Troquelado del talón: línea de puntos con dos muescas a los lados */

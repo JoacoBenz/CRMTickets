@@ -79,11 +79,24 @@ export default function NewOperacionForm({ onCreated, onError }: Props) {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-2xl bg-white p-5 shadow-card"
+      className="overflow-hidden rounded-2xl bg-white shadow-card"
     >
-      <h2 className="mb-4 font-display text-lg font-semibold">Nueva operación</h2>
+      {/* Cabecera violeta estilo stub */}
+      <div className="relative bg-brand px-5 py-3.5 text-white">
+        <h2 className="font-display text-base font-semibold">Nueva operación</h2>
+        <span
+          className="perf-notch left"
+          style={{ top: "50%", transform: "translateY(-50%)" }}
+          aria-hidden
+        />
+        <span
+          className="perf-notch right"
+          style={{ top: "50%", transform: "translateY(-50%)" }}
+          aria-hidden
+        />
+      </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 p-5">
         <div>
           <label htmlFor="evento" className={labelCls}>
             Evento
@@ -158,13 +171,15 @@ export default function NewOperacionForm({ onCreated, onError }: Props) {
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-4 w-full rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-      >
-        {loading ? "Creando…" : "Crear operación"}
-      </button>
+      <div className="px-5 pb-5">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+        >
+          {loading ? "Creando…" : "Crear operación"}
+        </button>
+      </div>
     </form>
   );
 }

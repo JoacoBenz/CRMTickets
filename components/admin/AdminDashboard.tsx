@@ -68,11 +68,13 @@ export default function AdminDashboard({ initial, baseUrl }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      {/* Mini stats */}
-      <section className="mb-6 grid grid-cols-3 gap-3">
-        <Stat label="En curso" value={stats.enCurso} accent="#C7891A" />
-        <Stat label="Confirmadas" value={stats.confirmadas} accent="#0E9B82" />
-        <Stat label="Totales" value={stats.total} accent="#5B4BE0" />
+      {/* Mini stats: tira única estilo talón, dividida por líneas punteadas */}
+      <section className="mb-6 overflow-hidden rounded-2xl bg-white shadow-card">
+        <div className="grid grid-cols-3 divide-x divide-dashed divide-[#E3E5ED]">
+          <Stat label="En curso" value={stats.enCurso} accent="#C7891A" />
+          <Stat label="Confirmadas" value={stats.confirmadas} accent="#0E9B82" />
+          <Stat label="Totales" value={stats.total} accent="#5B4BE0" />
+        </div>
       </section>
 
       <div className="grid gap-6 md:grid-cols-[minmax(0,340px)_1fr]">
@@ -129,15 +131,15 @@ function Stat({
   accent: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-card">
-      <p className="text-xs font-medium uppercase tracking-wide text-[#8A8FA0]">
+    <div className="px-4 py-4 text-center sm:text-left">
+      <p className="text-[11px] font-medium uppercase tracking-widest text-[#8A8FA0]">
         {label}
       </p>
       <p
-        className="mt-1 font-display text-3xl font-bold"
+        className="mt-0.5 font-display text-3xl font-bold tabular-nums"
         style={{ color: accent }}
       >
-        {value}
+        {String(value).padStart(2, "0")}
       </p>
     </div>
   );

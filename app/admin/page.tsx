@@ -39,17 +39,23 @@ export default async function AdminPage() {
 
   return (
     <main className="min-h-dvh bg-canvas">
-      <header className="border-b border-[#DADCE6] bg-canvas/80 backdrop-blur">
+      <header
+        className="border-b-2 border-dashed border-white/10 text-white"
+        style={{
+          background:
+            "linear-gradient(150deg, #262a45 0%, #1B1D29 60%, #16171e 100%)",
+        }}
+      >
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2">
             <span className="inline-block h-3 w-3 rounded-full bg-brand" />
             <span className="font-display text-lg font-bold">Resguardo</span>
-            <span className="hidden text-sm text-[#8A8FA0] sm:inline">
-              · Panel
+            <span className="hidden text-sm text-white/50 sm:inline">
+              · Custodia de operaciones
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-[#6A6E7E] sm:inline">
+            <span className="hidden font-mono text-xs text-white/50 sm:inline">
               {user.email}
             </span>
             <LogoutButton />
