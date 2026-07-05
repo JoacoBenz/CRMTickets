@@ -20,7 +20,8 @@ export type Operacion = {
   updated_at: string;
 };
 
-// Vista pública: subconjunto seguro de campos (sin datos de contacto).
+// Vista pública: subconjunto seguro de campos (sin datos de contacto y sin
+// la comisión, que es un dato interno entre el admin y las partes).
 export type OperacionPublica = Pick<
   Operacion,
   | "code"
@@ -28,7 +29,6 @@ export type OperacionPublica = Pick<
   | "comprador_alias"
   | "vendedor_alias"
   | "monto"
-  | "fee"
   | "status"
   | "updated_at"
 >;

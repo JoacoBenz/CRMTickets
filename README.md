@@ -6,8 +6,33 @@ un **link público** donde ambas partes ven el estado en tiempo real, sin tener 
 preguntar.
 
 - **Página pública** `/op/[id]` — talón de entrada read-only, se actualiza sola.
-- **Panel admin** `/admin` — login con Supabase Auth, alta de operaciones y avance
-  de estado "de un toque".
+- **Módulo de carga** `/moderador` — el moderador carga la entrada a vender con
+  los datos (alias) de comprador y vendedor, y comparte el link.
+- **Módulo de administración** `/admin` — el administrador chequea la lista y
+  actualiza los estados "de un toque".
+
+## Roles
+
+| Rol             | Puede                                                        |
+| --------------- | ------------------------------------------------------------ |
+| `administrador` | Ver lista, avanzar/cancelar/reabrir estados, y también cargar |
+| `moderador`     | Solo cargar operaciones y copiar el link/mensaje              |
+
+El rol vive en `app_metadata.role` del usuario de Supabase (el usuario no puede
+editarlo). Un usuario **sin rol asignado es administrador** (así el primer
+usuario funciona sin pasos extra). Para marcar a alguien como moderador, corré
+en el SQL Editor:
+
+```sql
+update auth.users
+set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb)
+    || '{"role":"moderador"}'::jsonb
+where email = 'moderador@ejemplo.com';
+```
+
+(Para volverlo administrador: mismo update con `'{"role":"administrador"}'`.)
+El moderador que intenta entrar a `/admin` es redirigido a `/moderador`, y el
+cambio de estados está bloqueado para moderadores también en la API.
 
 ## Stack
 
@@ -45,8 +70,9 @@ cancelada → esperando_entrada                        (reabrir)
 
 - La página pública se accede **solo por el uuid** (impredecible). Nunca se expone
   un id incremental.
-- La vista pública muestra **solo**: evento, monto, fee, estado, aliases y fecha de
-  actualización. Nada de teléfonos, mails ni nombres.
+- La vista pública muestra **solo**: evento, monto, estado, aliases y fecha de
+  actualización. Nada de teléfonos, mails, nombres ni comisión (la comisión es
+  un dato interno del panel).
 - **RLS activado**: lectura pública (anon) permitida; escritura y cambios de estado
   solo para usuarios autenticados.
 - Los cambios de estado y el alta se hacen vía **Route Handlers con la service role**
@@ -120,17 +146,20 @@ Abrí http://localhost:3000/admin
 app/
   page.tsx                       landing
   op/[id]/page.tsx               página pública (read-only, auto-refresh)
-  admin/page.tsx                 panel (server: auth + fetch)
-  admin/login/page.tsx           login email/password
-  api/operaciones/route.ts       POST crear (service role)
-  api/operaciones/[id]/status/route.ts   PATCH cambiar estado (service role)
+  admin/page.tsx                 módulo administrador (estados)
+  moderador/page.tsx             módulo moderador (carga)
+  admin/login/page.tsx           login email/password (redirige según rol)
+  api/operaciones/route.ts       POST crear (ambos roles, service role)
+  api/operaciones/[id]/status/route.ts   PATCH estado (solo admin, service role)
 components/
-  StatusStub.tsx  ProgressSteps.tsx  StatusChip.tsx  AutoRefresh.tsx
+  StatusStub.tsx  ProgressSteps.tsx  StatusChip.tsx  AutoRefresh.tsx  AppHeader.tsx
   admin/  AdminDashboard  NewOperacionForm  OperacionCard  Toast  LogoutButton
+  moderador/  ModeradorDashboard
 lib/
   operaciones.ts                 tipos, máquina de estados, labels, colores, helpers
+  auth.ts                        roles (administrador / moderador)
   supabase/client.ts  supabase/server.ts
-middleware.ts                    refresca sesión y protege /admin
+middleware.ts                    refresca sesión, protege /admin y /moderador por rol
 supabase/
   migrations/0001_init.sql       enum + tabla + trigger + RLS
   seed.sql                       datos de ejemplo

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { nextStatus, type Operacion, type Status } from "@/lib/operaciones";
-import NewOperacionForm from "./NewOperacionForm";
 import OperacionCard from "./OperacionCard";
 import { ToastViewport, useToast } from "./Toast";
 
@@ -11,8 +10,8 @@ type Props = {
   baseUrl: string;
 };
 
-// Panel del admin: mantiene el estado local de la lista y coordina
-// creación, avance y cambios de estado (todo vía Route Handlers).
+// Módulo del administrador: chequea la lista y actualiza estados.
+// La carga de operaciones nuevas vive en el módulo /moderador.
 export default function AdminDashboard({ initial, baseUrl }: Props) {
   const [ops, setOps] = useState<Operacion[]>(initial);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -27,13 +26,7 @@ export default function AdminDashboard({ initial, baseUrl }: Props) {
   }, [ops]);
 
   function replaceOp(id: string, status: Status) {
-    setOps((prev) =>
-      prev.map((o) =>
-        o.id === id
-          ? { ...o, status, updated_at: new Date(o.updated_at).toISOString() }
-          : o
-      )
-    );
+    setOps((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
   }
 
   async function changeStatus(op: Operacion, to: Status, okMsg: string) {
@@ -67,7 +60,7 @@ export default function AdminDashboard({ initial, baseUrl }: Props) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6">
+    <div className="mx-auto w-full max-w-3xl px-4 py-6">
       {/* Mini stats: tira única estilo talón, dividida por líneas punteadas */}
       <section className="mb-6 overflow-hidden rounded-2xl bg-white shadow-card">
         <div className="grid grid-cols-3 divide-x divide-dashed divide-[#E3E5ED]">
@@ -77,43 +70,27 @@ export default function AdminDashboard({ initial, baseUrl }: Props) {
         </div>
       </section>
 
-      <div className="grid gap-6 md:grid-cols-[minmax(0,340px)_1fr]">
-        {/* Columna izquierda: form */}
-        <div className="md:sticky md:top-6 md:self-start">
-          <NewOperacionForm
-            onCreated={(op) => {
-              setOps((prev) => [op, ...prev]);
-              push("success", `Operación ${op.code} creada`);
-            }}
-            onError={(m) => push("error", m)}
-          />
-        </div>
-
-        {/* Columna derecha: lista */}
-        <div className="space-y-3">
-          {ops.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#C7CAD6] bg-white/50 px-4 py-10 text-center text-sm text-[#8A8FA0]">
-              Todavía no hay operaciones. Creá la primera desde el formulario.
-            </div>
-          ) : (
-            ops.map((op) => (
-              <OperacionCard
-                key={op.id}
-                op={op}
-                baseUrl={baseUrl}
-                busy={busyId === op.id}
-                onAdvance={onAdvance}
-                onCancel={(o) =>
-                  changeStatus(o, "cancelada", "Operación cancelada")
-                }
-                onReopen={(o) =>
-                  changeStatus(o, "esperando_entrada", "Operación reabierta")
-                }
-                onCopied={(m) => push("success", m)}
-              />
-            ))
-          )}
-        </div>
+      <div className="space-y-3">
+        {ops.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-[#C7CAD6] bg-white/50 px-4 py-10 text-center text-sm text-[#8A8FA0]">
+            Todavía no hay operaciones. Se cargan desde el módulo de carga.
+          </div>
+        ) : (
+          ops.map((op) => (
+            <OperacionCard
+              key={op.id}
+              op={op}
+              baseUrl={baseUrl}
+              busy={busyId === op.id}
+              onAdvance={onAdvance}
+              onCancel={(o) => changeStatus(o, "cancelada", "Operación cancelada")}
+              onReopen={(o) =>
+                changeStatus(o, "esperando_entrada", "Operación reabierta")
+              }
+              onCopied={(m) => push("success", m)}
+            />
+          ))
+        )}
       </div>
 
       <ToastViewport toasts={toasts} />

@@ -13,10 +13,12 @@ import StatusChip from "@/components/StatusChip";
 type Props = {
   op: Operacion;
   baseUrl: string;
-  busy: boolean;
-  onAdvance: (op: Operacion) => void;
-  onCancel: (op: Operacion) => void;
-  onReopen: (op: Operacion) => void;
+  busy?: boolean;
+  // readOnly: modo moderador — sin botones de cambio de estado.
+  readOnly?: boolean;
+  onAdvance?: (op: Operacion) => void;
+  onCancel?: (op: Operacion) => void;
+  onReopen?: (op: Operacion) => void;
   onCopied: (text: string) => void;
 };
 
@@ -26,7 +28,8 @@ type Props = {
 export default function OperacionCard({
   op,
   baseUrl,
-  busy,
+  busy = false,
+  readOnly = false,
   onAdvance,
   onCancel,
   onReopen,
@@ -95,9 +98,9 @@ export default function OperacionCard({
         )}
 
         {/* Botón primario de un toque */}
-        {next && advanceLabel && (
+        {!readOnly && next && advanceLabel && (
           <button
-            onClick={() => onAdvance(op)}
+            onClick={() => onAdvance?.(op)}
             disabled={busy}
             className="mt-4 w-full rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
             style={{ backgroundColor: STATUS_COLOR[next] }}
@@ -133,25 +136,26 @@ export default function OperacionCard({
           Copiar WhatsApp
         </button>
 
-        {op.status === "cancelada" ? (
-          <button
-            onClick={() => onReopen(op)}
-            disabled={busy}
-            className="ml-auto rounded-lg border border-brand px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand/5 disabled:opacity-60"
-          >
-            Reabrir
-          </button>
-        ) : (
-          op.status !== "confirmada" && (
+        {!readOnly &&
+          (op.status === "cancelada" ? (
             <button
-              onClick={() => onCancel(op)}
+              onClick={() => onReopen?.(op)}
               disabled={busy}
-              className="ml-auto rounded-lg border border-estado-cancelada px-3 py-1.5 text-xs font-semibold text-estado-cancelada transition-colors hover:bg-estado-cancelada/5 disabled:opacity-60"
+              className="ml-auto rounded-lg border border-brand px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand/5 disabled:opacity-60"
             >
-              Cancelar
+              Reabrir
             </button>
-          )
-        )}
+          ) : (
+            op.status !== "confirmada" && (
+              <button
+                onClick={() => onCancel?.(op)}
+                disabled={busy}
+                className="ml-auto rounded-lg border border-estado-cancelada px-3 py-1.5 text-xs font-semibold text-estado-cancelada transition-colors hover:bg-estado-cancelada/5 disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+            )
+          ))}
       </div>
     </article>
   );

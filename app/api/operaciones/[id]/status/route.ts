@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase, createAdminSupabase } from "@/lib/supabase/server";
 import { canTransition, type Status } from "@/lib/operaciones";
+import { getRol } from "@/lib/auth";
 
 const VALID: Status[] = [
   "esperando_entrada",
@@ -22,6 +23,14 @@ export async function PATCH(
 
   if (!user) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  // Los moderadores solo cargan operaciones; el estado lo maneja el admin.
+  if (getRol(user) !== "administrador") {
+    return NextResponse.json(
+      { error: "Solo el administrador puede cambiar estados" },
+      { status: 403 }
+    );
   }
 
   let body: any;

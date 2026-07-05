@@ -23,11 +23,12 @@ export default async function OperacionPublicaPage({
 
   const supabase = createServerSupabase();
 
-  // Seleccionamos SOLO los campos públicos. Nada de contacto ni id incremental.
+  // Seleccionamos SOLO los campos públicos. Nada de contacto, comisión ni
+  // id incremental.
   const { data, error } = await supabase
     .from("operaciones")
     .select(
-      "code, evento, comprador_alias, vendedor_alias, monto, fee, status, updated_at"
+      "code, evento, comprador_alias, vendedor_alias, monto, status, updated_at"
     )
     .eq("id", params.id)
     .maybeSingle();

@@ -99,20 +99,12 @@ export default function StatusStub({ op }: { op: OperacionPublica }) {
           <ProgressSteps status={op.status} />
 
           <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
-            <div>
+            <div className="col-span-2">
               <dt className="text-xs font-medium uppercase tracking-wide text-[#8A8FA0]">
                 Monto
               </dt>
-              <dd className="mt-0.5 font-display text-lg font-semibold">
+              <dd className="mt-0.5 font-display text-2xl font-bold">
                 {formatARS(op.monto)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-wide text-[#8A8FA0]">
-                Comisión
-              </dt>
-              <dd className="mt-0.5 font-display text-lg font-semibold">
-                {formatARS(op.fee)}
               </dd>
             </div>
             {op.comprador_alias && (

@@ -2,13 +2,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getRol } from "@/lib/auth";
-import AdminDashboard from "@/components/admin/AdminDashboard";
+import ModeradorDashboard from "@/components/moderador/ModeradorDashboard";
 import AppHeader from "@/components/AppHeader";
 import type { Operacion } from "@/lib/operaciones";
 
 export const dynamic = "force-dynamic";
 
-// Deriva la URL base para armar los links públicos.
 function getBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
@@ -19,36 +18,37 @@ function getBaseUrl(): string {
   return `${proto}://${host}`;
 }
 
-// Módulo del administrador: chequea y actualiza los estados.
-export default async function AdminPage() {
+// Módulo del moderador: carga la entrada a vender con los datos de
+// comprador y vendedor. También lo puede usar el admin para cargar.
+export default async function ModeradorPage() {
   const supabase = createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Refuerzo por si el middleware no corrió (defensa en profundidad).
   if (!user) {
     redirect("/admin/login");
   }
-  if (getRol(user) !== "administrador") {
-    redirect("/moderador");
-  }
 
+  const esAdmin = getRol(user) === "administrador";
+
+  // Últimas operaciones cargadas, para referencia y para copiar links.
   const { data } = await supabase
     .from("operaciones")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(10);
 
   const ops = (data ?? []) as Operacion[];
 
   return (
     <main className="min-h-dvh bg-canvas">
       <AppHeader
-        subtitle="Administración"
+        subtitle="Carga de operaciones"
         email={user.email}
-        action={{ href: "/moderador", label: "＋ Cargar operación" }}
+        action={esAdmin ? { href: "/admin", label: "Ir al panel" } : undefined}
       />
-      <AdminDashboard initial={ops} baseUrl={getBaseUrl()} />
+      <ModeradorDashboard initial={ops} baseUrl={getBaseUrl()} />
     </main>
   );
 }

@@ -1,7 +1,10 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getRol } from "@/lib/auth";
 
-// Refresca la sesión de Supabase Auth y protege /admin.
+// Refresca la sesión de Supabase Auth y protege los módulos:
+// - /admin: solo rol administrador (los moderadores van a /moderador)
+// - /moderador: cualquier usuario autenticado
 // La página pública /op/[id] queda fuera del matcher (acceso anónimo).
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -35,25 +38,36 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isLogin = path === "/admin/login";
-  const isAdmin = path.startsWith("/admin");
+  const needsAuth = path.startsWith("/admin") || path.startsWith("/moderador");
 
-  // Sin sesión en una ruta de admin (que no sea el login) -> al login.
-  if (isAdmin && !isLogin && !user) {
+  function redirectTo(pathname: string) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
+    url.pathname = pathname;
     return NextResponse.redirect(url);
   }
 
-  // Ya logueado y entrando al login -> al panel.
-  if (isLogin && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin";
-    return NextResponse.redirect(url);
+  // Sin sesión en una ruta protegida (que no sea el login) -> al login.
+  if (!user && needsAuth && !isLogin) {
+    return redirectTo("/admin/login");
+  }
+
+  if (user) {
+    const rol = getRol(user);
+
+    // Ya logueado y entrando al login -> a su módulo.
+    if (isLogin) {
+      return redirectTo(rol === "moderador" ? "/moderador" : "/admin");
+    }
+
+    // Moderador intentando entrar al panel de administración -> a su módulo.
+    if (rol === "moderador" && path.startsWith("/admin")) {
+      return redirectTo("/moderador");
+    }
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/moderador/:path*"],
 };
