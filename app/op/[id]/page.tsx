@@ -47,7 +47,7 @@ export default async function OperacionPublicaPage({
       <AutoRefresh />
       <StatusStub op={op} />
       <footer className="mt-6 text-center text-xs text-[#9A9EAE]">
-        Resguardo · custodia de operaciones
+        AdminTickets · custodia de operaciones
       </footer>
     </main>
   );

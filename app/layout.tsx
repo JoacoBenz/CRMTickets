@@ -21,7 +21,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Resguardo — Custodia de operaciones",
+  title: "AdminTickets — Custodia de operaciones",
   description:
     "Seguimiento en tiempo real de operaciones de compra-venta de entradas.",
 };

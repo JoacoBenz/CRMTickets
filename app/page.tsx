@@ -15,7 +15,7 @@ export default function Home() {
             <span className="inline-block h-2 w-2 rounded-full bg-brand" />
             Custodia de operaciones
           </div>
-          <h1 className="mt-2 font-display text-3xl font-bold">Resguardo</h1>
+          <h1 className="mt-2 font-display text-3xl font-bold">AdminTickets</h1>
         </div>
 
         <div className="relative">

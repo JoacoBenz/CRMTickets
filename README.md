@@ -1,4 +1,4 @@
-# Resguardo
+# AdminTickets
 
 Sistema de **custodia / escrow** para operaciones de compra-venta de entradas de
 reventa. Un administrador media entre comprador y vendedor, y cada operación tiene

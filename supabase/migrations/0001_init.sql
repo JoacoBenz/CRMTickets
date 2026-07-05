@@ -1,4 +1,4 @@
--- Resguardo — esquema inicial
+-- AdminTickets — esquema inicial
 -- Tabla `operaciones` + enum de estado + trigger de updated_at + RLS.
 
 -- Necesario para gen_random_uuid()

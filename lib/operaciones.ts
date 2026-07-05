@@ -137,5 +137,5 @@ export function formatARS(n: number): string {
 
 // Mensaje de WhatsApp ya armado para pegar en el chat.
 export function whatsappMessage(evento: string, link: string): string {
-  return `Hola 👋 Soy del equipo de Resguardo (${evento}). Seguí el estado de tu operación acá: ${link}. Se actualiza solo, no hace falta que preguntes.`;
+  return `Hola 👋 Soy del equipo de AdminTickets (${evento}). Seguí el estado de tu operación acá: ${link}. Se actualiza solo, no hace falta que preguntes.`;
 }

@@ -57,7 +57,7 @@ export default function StatusStub({ op }: { op: OperacionPublica }) {
                   className="inline-block h-2 w-2 rounded-full bg-brand"
                   aria-hidden
                 />
-                Resguardo · Custodia
+                AdminTickets · Custodia
               </div>
               <span className="whitespace-nowrap rounded-md border border-white/15 px-2 py-0.5 font-mono text-[11px] text-white/70">
                 {op.code}

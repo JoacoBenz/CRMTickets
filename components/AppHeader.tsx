@@ -20,7 +20,7 @@ export default function AppHeader({ subtitle, email, action }: Props) {
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2">
           <span className="inline-block h-3 w-3 rounded-full bg-brand" />
-          <span className="font-display text-lg font-bold">Resguardo</span>
+          <span className="font-display text-lg font-bold">AdminTickets</span>
           <span className="hidden text-sm text-white/50 sm:inline">
             · {subtitle}
           </span>
