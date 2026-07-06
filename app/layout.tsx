@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
-import { Manrope, Inter, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Archivo, Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const display = Manrope({
+const display = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
 });
 
-const body = Inter({
+const body = Archivo({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
 });
 
-const mono = JetBrains_Mono({
+const mono = Space_Mono({
   subsets: ["latin"],
+  weight: ["400", "700"],
   variable: "--font-mono",
   display: "swap",
 });

@@ -42,7 +42,7 @@ export default async function AdminPage() {
   const ops = (data ?? []) as Operacion[];
 
   return (
-    <main className="min-h-dvh bg-canvas">
+    <main className="min-h-dvh">
       <AppHeader
         subtitle="Administración"
         email={user.email}

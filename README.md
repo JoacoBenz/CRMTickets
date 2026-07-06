@@ -73,8 +73,10 @@ cancelada → esperando_entrada                        (reabrir)
 - La vista pública muestra **solo**: evento, monto, estado, aliases y fecha de
   actualización. Nada de teléfonos, mails, nombres ni comisión (la comisión es
   un dato interno del panel).
-- **RLS activado**: lectura pública (anon) permitida; escritura y cambios de estado
-  solo para usuarios autenticados.
+- **RLS activado**: anon NO puede leer la tabla directamente (evita que alguien
+  con la anon key liste todas las operaciones). La vista pública lee vía el RPC
+  `operacion_publica(uuid)`, que exige el uuid exacto y devuelve solo los campos
+  públicos. Escritura y cambios de estado solo para usuarios autenticados.
 - Los cambios de estado y el alta se hacen vía **Route Handlers con la service role**
   (`app/api/operaciones/...`), nunca desde el cliente con la anon key. Cada handler
   verifica que haya un admin logueado antes de escribir.
@@ -114,10 +116,12 @@ Abrí http://localhost:3000/admin
 
 1. **Crear proyecto** en https://supabase.com/dashboard → *New project*. Elegí una
    región cercana (ej. São Paulo) y guardá la contraseña de la base.
-2. **Correr la migración**: en el dashboard, andá a **SQL Editor → New query**, pegá
+2. **Correr las migraciones**: en el dashboard, andá a **SQL Editor → New query**, pegá
    todo el contenido de [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)
-   y ejecutá (*Run*). Esto crea el enum, la tabla, el trigger de `updated_at` y las
-   políticas RLS.
+   y ejecutá (*Run*). Después repetí con
+   [`supabase/migrations/0002_public_read_rpc.sql`](supabase/migrations/0002_public_read_rpc.sql).
+   Esto crea el enum, la tabla, el trigger de `updated_at`, las políticas RLS y el
+   RPC de lectura pública.
 3. **(Opcional) Seed**: pegá y ejecutá [`supabase/seed.sql`](supabase/seed.sql) para
    tener 2-3 operaciones de ejemplo.
 4. **Copiar las keys**: **Project Settings → API**. Copiá:

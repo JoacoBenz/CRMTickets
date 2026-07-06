@@ -42,7 +42,7 @@ export default async function ModeradorPage() {
   const ops = (data ?? []) as Operacion[];
 
   return (
-    <main className="min-h-dvh bg-canvas">
+    <main className="min-h-dvh">
       <AppHeader
         subtitle="Carga de operaciones"
         email={user.email}

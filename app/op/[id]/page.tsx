@@ -5,7 +5,8 @@ import AutoRefresh from "@/components/AutoRefresh";
 import type { OperacionPublica, Status } from "@/lib/operaciones";
 
 // Página pública read-only. Se accede por el uuid (impredecible).
-// Muestra SOLO campos seguros: evento, monto, fee, estado, aliases y fecha.
+// Lee vía el RPC `operacion_publica`, que exige el uuid exacto y devuelve
+// SOLO campos seguros: evento, monto, estado, aliases y fecha.
 export const dynamic = "force-dynamic";
 
 // Validación básica de uuid v4/genérico para no consultar con basura.
@@ -23,14 +24,8 @@ export default async function OperacionPublicaPage({
 
   const supabase = createServerSupabase();
 
-  // Seleccionamos SOLO los campos públicos. Nada de contacto, comisión ni
-  // id incremental.
   const { data, error } = await supabase
-    .from("operaciones")
-    .select(
-      "code, evento, comprador_alias, vendedor_alias, monto, status, updated_at"
-    )
-    .eq("id", params.id)
+    .rpc("operacion_publica", { op_id: params.id })
     .maybeSingle();
 
   if (error || !data) {
@@ -38,15 +33,15 @@ export default async function OperacionPublicaPage({
   }
 
   const op: OperacionPublica = {
-    ...data,
-    status: data.status as Status,
+    ...(data as Omit<OperacionPublica, "status"> & { status: string }),
+    status: (data as { status: string }).status as Status,
   };
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-canvas px-4 py-8">
+    <main className="flex min-h-dvh flex-col items-center justify-center px-4 py-8">
       <AutoRefresh />
       <StatusStub op={op} />
-      <footer className="mt-6 text-center text-xs text-[#9A9EAE]">
+      <footer className="mt-6 text-center text-xs text-muted">
         AdminTickets · custodia de operaciones
       </footer>
     </main>

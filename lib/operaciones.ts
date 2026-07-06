@@ -43,10 +43,10 @@ export const STATUS_LABEL: Record<Status, string> = {
 
 // Colores por estado (NO semáforo). Se usan tanto en talón como en chips.
 export const STATUS_COLOR: Record<Status, string> = {
-  esperando_entrada: "#5B6072", // pizarra
-  entrada_recibida: "#C7891A", // ámbar
-  confirmada: "#0E9B82", // verde-teal
-  cancelada: "#C0566E", // rosa
+  esperando_entrada: "#5F6577", // pizarra
+  entrada_recibida: "#B07A14", // ámbar
+  confirmada: "#0D9377", // verde-teal
+  cancelada: "#D14D68", // rosa
 };
 
 // Máquina de estados.

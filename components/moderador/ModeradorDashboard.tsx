@@ -45,9 +45,9 @@ export default function ModeradorDashboard({ initial, baseUrl }: Props) {
         {/* Columna derecha: link para compartir + cargadas recientes */}
         <div className="space-y-3">
           {lastCreated && (
-            <div className="overflow-hidden rounded-2xl bg-white shadow-card">
+            <div className="card-shadow overflow-hidden rounded-2xl bg-white">
               <div className="border-l-4 border-estado-confirmada px-4 py-3">
-                <p className="text-xs font-medium uppercase tracking-widest text-[#8A8FA0]">
+                <p className="text-xs font-medium uppercase tracking-widest text-muted">
                   Lista para compartir
                 </p>
                 <p className="mt-1 font-mono text-sm">{lastCreated.code}</p>
@@ -59,7 +59,7 @@ export default function ModeradorDashboard({ initial, baseUrl }: Props) {
                     onClick={() =>
                       copy(`${baseUrl}/op/${lastCreated.id}`, "Link copiado")
                     }
-                    className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                    className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-brand-deep"
                   >
                     Copiar link
                   </button>
@@ -82,12 +82,12 @@ export default function ModeradorDashboard({ initial, baseUrl }: Props) {
             </div>
           )}
 
-          <h2 className="pt-2 text-xs font-medium uppercase tracking-widest text-[#8A8FA0]">
+          <h2 className="pt-2 text-xs font-medium uppercase tracking-widest text-muted">
             Cargadas recientemente
           </h2>
 
           {ops.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#C7CAD6] bg-white/50 px-4 py-10 text-center text-sm text-[#8A8FA0]">
+            <div className="rounded-2xl border border-dashed border-[#C5C9D6] bg-white/50 px-4 py-10 text-center text-sm text-muted">
               Todavía no hay operaciones. Cargá la primera desde el formulario.
             </div>
           ) : (

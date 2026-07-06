@@ -25,24 +25,24 @@ export default function ProgressSteps({ status }: { status: Status }) {
             <div key={label} className="flex flex-1 items-center last:flex-none">
               <div className="flex flex-col items-center gap-1.5">
                 <div
-                  className="flex h-7 w-7 items-center justify-center rounded-full border-2 text-[11px] font-bold transition-colors"
+                  className="flex h-7 w-7 items-center justify-center rounded-full border-2 font-mono text-[11px] font-bold transition-colors"
                   style={{
-                    borderColor: active ? color : "#C7CAD6",
+                    borderColor: active ? color : "#CBCEDA",
                     backgroundColor: active ? color : "transparent",
-                    color: active ? "#fff" : "#8A8FA0",
+                    color: active ? "#fff" : "#7B8095",
                   }}
                 >
-                  {i + 1}
+                  {dotFilled && !dotCurrent ? "✓" : i + 1}
                 </div>
                 <span
-                  className="text-[11px] font-medium"
-                  style={{ color: active ? color : "#8A8FA0" }}
+                  className="text-[11px] font-medium uppercase tracking-wide"
+                  style={{ color: active ? color : "#7B8095" }}
                 >
                   {label}
                 </span>
               </div>
               {i < PROGRESS_LABELS.length - 1 && (
-                <div className="mx-1.5 h-0.5 flex-1 rounded-full bg-[#D7DAE4]">
+                <div className="mx-1.5 mb-5 h-0.5 flex-1 rounded-full bg-line">
                   <div
                     className="h-full rounded-full transition-all"
                     style={{

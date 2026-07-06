@@ -6,7 +6,11 @@ export default function StatusChip({ status }: { status: Status }) {
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
-      style={{ color, backgroundColor: `${color}1A` }}
+      style={{
+        color,
+        backgroundColor: `${color}14`,
+        boxShadow: `inset 0 0 0 1px ${color}33`,
+      }}
     >
       <span
         className="h-1.5 w-1.5 rounded-full"

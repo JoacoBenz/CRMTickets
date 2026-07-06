@@ -34,82 +34,78 @@ export default function LoginPage() {
     router.refresh();
   }
 
+  const inputCls =
+    "w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15";
+
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-canvas px-4">
-      <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-card">
+    <main className="flex min-h-dvh items-center justify-center px-4">
+      <div className="ticket-shadow w-full max-w-sm overflow-hidden rounded-3xl">
+        <div className="holo-strip" aria-hidden />
         {/* Banda oscura estilo talón */}
-        <div
-          className="px-6 pb-7 pt-6 text-white"
-          style={{
-            background:
-              "linear-gradient(150deg, #262a45 0%, #1B1D29 60%, #16171e 100%)",
-          }}
-        >
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/60">
+        <div className="surface-ink punch-b px-6 pb-7 pt-6 text-white">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-white/60">
             <span className="inline-block h-2 w-2 rounded-full bg-brand" />
             AdminTickets · Custodia
           </div>
-          <h1 className="mt-2 font-display text-2xl font-bold">
+          <h1 className="mt-2 font-display text-2xl font-bold tracking-tight">
             Panel de administración
           </h1>
         </div>
-        <div className="relative">
+
+        <div className="punch-t bg-white">
           <div className="perf-line-light mx-6" />
-          <span className="perf-notch-light left" aria-hidden />
-          <span className="perf-notch-light right" aria-hidden />
+          <form onSubmit={onSubmit} className="space-y-4 p-6">
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-1 block text-sm font-medium text-[#4A4E5E]"
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-1 block text-sm font-medium text-[#4A4E5E]"
+              >
+                Contraseña
+              </label>
+              <input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+
+            {error && (
+              <p className="rounded-lg bg-estado-cancelada/10 px-3 py-2 text-sm text-estado-cancelada">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-deep disabled:opacity-60"
+            >
+              {loading ? "Ingresando…" : "Ingresar"}
+            </button>
+          </form>
         </div>
-
-        <form onSubmit={onSubmit} className="space-y-4 p-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-1 block text-sm font-medium text-[#4A4E5E]"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-[#D7DAE4] bg-white px-3 py-2 text-sm outline-none focus:border-brand"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-1 block text-sm font-medium text-[#4A4E5E]"
-            >
-              Contraseña
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-[#D7DAE4] bg-white px-3 py-2 text-sm outline-none focus:border-brand"
-            />
-          </div>
-
-          {error && (
-            <p className="rounded-lg bg-estado-cancelada/10 px-3 py-2 text-sm text-estado-cancelada">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
-            {loading ? "Ingresando…" : "Ingresar"}
-          </button>
-        </form>
       </div>
     </main>
   );
