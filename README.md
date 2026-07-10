@@ -140,7 +140,8 @@ Abrí http://localhost:3000/admin
    [`0001_init.sql`](supabase/migrations/0001_init.sql) (enum, tabla, trigger de
    `updated_at`), [`0002_public_read_rpc.sql`](supabase/migrations/0002_public_read_rpc.sql)
    (RPC de lectura pública) y [`0003_lockdown.sql`](supabase/migrations/0003_lockdown.sql)
-   (RLS deny-all, trigger de transiciones, `created_by` y auditoría).
+   (RLS deny-all, trigger de transiciones, `created_by` y auditoría) y
+   [`0004_function_search_path.sql`](supabase/migrations/0004_function_search_path.sql).
 3. **(Opcional) Seed**: pegá y ejecutá [`supabase/seed.sql`](supabase/seed.sql) para
    tener 2-3 operaciones de ejemplo.
 4. **Copiar las keys**: **Project Settings → API**. Copiá:
