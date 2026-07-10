@@ -39,6 +39,9 @@ export async function POST(request: Request) {
   const vendedor_alias = body.vendedor_alias
     ? String(body.vendedor_alias).trim()
     : null;
+  const cuenta_debitar = body.cuenta_debitar
+    ? String(body.cuenta_debitar).trim().slice(0, 200)
+    : null;
   const monto = Math.trunc(Number(body.monto));
   const fee = Math.trunc(Number(body.fee));
 
@@ -67,6 +70,7 @@ export async function POST(request: Request) {
         evento,
         comprador_alias,
         vendedor_alias,
+        cuenta_debitar,
         monto,
         fee,
         created_by: user.id,

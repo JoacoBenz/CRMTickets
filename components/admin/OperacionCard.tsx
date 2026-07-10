@@ -120,6 +120,13 @@ export default function OperacionCard({
             </div>
           )}
 
+          {op.cuenta_debitar && (
+            <div className="mt-2 text-xs text-[#6A6E7E]">
+              Debita de:{" "}
+              <span className="font-mono font-medium">{op.cuenta_debitar}</span>
+            </div>
+          )}
+
           {/* Botón primario de un toque */}
           {!readOnly && next && advanceLabel && (
             <button
