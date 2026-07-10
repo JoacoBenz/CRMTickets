@@ -141,6 +141,7 @@ export default function NewOperacionForm({ onCreated, onError }: Props) {
                 id="monto"
                 type="number"
                 min={0}
+                max={2000000000}
                 inputMode="numeric"
                 className={`${inputCls} font-mono`}
                 value={form.monto}
@@ -156,6 +157,7 @@ export default function NewOperacionForm({ onCreated, onError }: Props) {
                 id="fee"
                 type="number"
                 min={0}
+                max={2000000000}
                 inputMode="numeric"
                 className={`${inputCls} font-mono`}
                 value={form.fee}

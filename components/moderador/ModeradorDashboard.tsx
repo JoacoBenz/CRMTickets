@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { whatsappMessage, type Operacion } from "@/lib/operaciones";
 import NewOperacionForm from "@/components/admin/NewOperacionForm";
 import OperacionCard from "@/components/admin/OperacionCard";
@@ -17,6 +17,11 @@ export default function ModeradorDashboard({ initial, baseUrl }: Props) {
   const [ops, setOps] = useState<Operacion[]>(initial);
   const [lastCreated, setLastCreated] = useState<Operacion | null>(null);
   const { toasts, push } = useToast();
+
+  // Realinea la lista con el servidor en cada auto-refresh.
+  useEffect(() => {
+    setOps(initial);
+  }, [initial]);
 
   async function copy(text: string, label: string) {
     try {

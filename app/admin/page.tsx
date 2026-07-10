@@ -1,23 +1,13 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { createServerSupabase, createAdminSupabase } from "@/lib/supabase/server";
 import { getRol } from "@/lib/auth";
+import { getBaseUrl } from "@/lib/urls";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AppHeader from "@/components/AppHeader";
+import AutoRefresh from "@/components/AutoRefresh";
 import type { Operacion } from "@/lib/operaciones";
 
 export const dynamic = "force-dynamic";
-
-// Deriva la URL base para armar los links públicos.
-function getBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  }
-  const h = headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  return `${proto}://${host}`;
-}
 
 // Módulo del administrador: chequea y actualiza los estados.
 export default async function AdminPage() {
@@ -30,11 +20,16 @@ export default async function AdminPage() {
   if (!user) {
     redirect("/admin/login");
   }
-  if (getRol(user) !== "administrador") {
+  const rol = getRol(user);
+  if (!rol) {
+    redirect("/sin-acceso");
+  }
+  if (rol !== "administrador") {
     redirect("/moderador");
   }
 
-  const { data } = await supabase
+  // Con RLS en deny-all, la lectura va con service role (ya validamos rol).
+  const { data } = await createAdminSupabase()
     .from("operaciones")
     .select("*")
     .order("created_at", { ascending: false });
@@ -43,6 +38,9 @@ export default async function AdminPage() {
 
   return (
     <main className="min-h-dvh">
+      {/* El panel también se refresca solo: si el moderador carga una
+          operación, aparece acá sin recargar a mano. */}
+      <AutoRefresh intervalMs={15000} />
       <AppHeader
         subtitle="Administración"
         email={user.email}

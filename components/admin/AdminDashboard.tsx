@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { nextStatus, type Operacion, type Status } from "@/lib/operaciones";
 import OperacionCard from "./OperacionCard";
 import { ToastViewport, useToast } from "./Toast";
@@ -40,6 +40,12 @@ export default function AdminDashboard({ initial, baseUrl }: Props) {
   const [filter, setFilter] = useState<Filter>("todas");
   const { toasts, push } = useToast();
 
+  // El server component se refresca solo (AutoRefresh): cuando llegan datos
+  // nuevos, el estado local se realinea con el servidor.
+  useEffect(() => {
+    setOps(initial);
+  }, [initial]);
+
   const stats = useMemo(() => {
     const enCurso = ops.filter(
       (o) => o.status === "esperando_entrada" || o.status === "entrada_recibida"
@@ -54,7 +60,11 @@ export default function AdminDashboard({ initial, baseUrl }: Props) {
   );
 
   function replaceOp(id: string, status: Status) {
-    setOps((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+    // updated_at optimista: el valor real lo trae el próximo refresh.
+    const now = new Date().toISOString();
+    setOps((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, status, updated_at: now } : o))
+    );
   }
 
   async function changeStatus(op: Operacion, to: Status, okMsg: string) {

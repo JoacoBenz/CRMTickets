@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
   STATUS_COLOR,
   formatARS,
@@ -39,6 +40,27 @@ export default function OperacionCard({
   const color = STATUS_COLOR[op.status];
   const advanceLabel = nextStatusLabel(op.status);
   const next = nextStatus(op.status);
+
+  // "Confirmar pago" lleva a un estado terminal sin vuelta atrás: pide un
+  // segundo toque dentro de una ventana corta para evitar mis-taps.
+  const [confirming, setConfirming] = useState(false);
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    };
+  }, []);
+
+  function handleAdvance() {
+    if (next === "confirmada" && !confirming) {
+      setConfirming(true);
+      confirmTimer.current = setTimeout(() => setConfirming(false), 4000);
+      return;
+    }
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    setConfirming(false);
+    onAdvance?.(op);
+  }
 
   async function copy(text: string, label: string) {
     try {
@@ -101,12 +123,19 @@ export default function OperacionCard({
           {/* Botón primario de un toque */}
           {!readOnly && next && advanceLabel && (
             <button
-              onClick={() => onAdvance?.(op)}
+              onClick={handleAdvance}
               disabled={busy}
               className="mt-4 w-full rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
-              style={{ backgroundColor: STATUS_COLOR[next] }}
+              style={{
+                backgroundColor: STATUS_COLOR[next],
+                outline: confirming
+                  ? "3px solid rgba(13,147,119,0.35)"
+                  : "none",
+              }}
             >
-              {advanceLabel} →
+              {confirming
+                ? "¿Seguro? Tocá de nuevo para confirmar"
+                : `${advanceLabel} →`}
             </button>
           )}
         </div>

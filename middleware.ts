@@ -54,6 +54,11 @@ export async function middleware(request: NextRequest) {
   if (user) {
     const rol = getRol(user);
 
+    // Cuenta sin rol asignado: no entra a ningún módulo.
+    if (!rol) {
+      return redirectTo("/sin-acceso");
+    }
+
     // Ya logueado y entrando al login -> a su módulo.
     if (isLogin) {
       return redirectTo(rol === "moderador" ? "/moderador" : "/admin");

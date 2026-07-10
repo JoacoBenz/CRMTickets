@@ -44,12 +44,15 @@ function Microtext({ dark = false }: { dark?: boolean }) {
 // troquelado son agujeros de verdad a través de los que se ve la página.
 export default function StatusStub({ op }: { op: OperacionPublica }) {
   const color = STATUS_COLOR[op.status];
+  // timeZone explícita: esto se formatea en el servidor (UTC en Vercel) y
+  // sin fijarla la hora saldría corrida 3 horas para Argentina.
   const actualizado = new Date(op.updated_at).toLocaleString("es-AR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "America/Argentina/Buenos_Aires",
   });
 
   return (

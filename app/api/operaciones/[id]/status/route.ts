@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabase, createAdminSupabase } from "@/lib/supabase/server";
 import { canTransition, type Status } from "@/lib/operaciones";
 import { getRol } from "@/lib/auth";
+import { UUID_RE } from "@/lib/urls";
 
 const VALID: Status[] = [
   "esperando_entrada",
@@ -11,11 +12,15 @@ const VALID: Status[] = [
 ];
 
 // PATCH /api/operaciones/[id]/status — cambia el estado respetando la
-// máquina de estados. Requiere admin logueado; escribe con service role.
+// máquina de estados. Solo administrador; escribe con service role.
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  if (!UUID_RE.test(params.id)) {
+    return NextResponse.json({ error: "Id inválido" }, { status: 400 });
+  }
+
   const supabase = createServerSupabase();
   const {
     data: { user },
@@ -47,7 +52,7 @@ export async function PATCH(
 
   const admin = createAdminSupabase();
 
-  // Leemos el estado actual para validar la transición en el servidor.
+  // Leemos el estado actual para validar la transición y dar buen error.
   const { data: current, error: readErr } = await admin
     .from("operaciones")
     .select("status")
@@ -72,16 +77,37 @@ export async function PATCH(
     );
   }
 
+  // Update CONDICIONAL al estado leído: si otro request cambió el estado
+  // entre la lectura y la escritura, no matchea ninguna fila y devolvemos
+  // 409 en vez de pisar el cambio ajeno (sin carrera leer-validar-escribir).
   const { data, error } = await admin
     .from("operaciones")
     .update({ status: to })
     .eq("id", params.id)
+    .eq("status", from)
     .select("id, status")
-    .single();
+    .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // P0001 = el trigger de la base rechazó la transición (doble defensa).
+    const status = (error as any).code === "P0001" ? 409 : 500;
+    return NextResponse.json({ error: error.message }, { status });
   }
+  if (!data) {
+    return NextResponse.json(
+      { error: "La operación cambió de estado, actualizá la página" },
+      { status: 409 }
+    );
+  }
+
+  // Auditoría: quién hizo la transición y cuándo.
+  await admin.from("operacion_eventos").insert({
+    operacion_id: data.id,
+    de: from,
+    a: to,
+    actor_id: user.id,
+    actor_email: user.email ?? null,
+  });
 
   return NextResponse.json({ id: data.id, status: data.status });
 }

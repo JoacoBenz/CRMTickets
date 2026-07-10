@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase, createAdminSupabase } from "@/lib/supabase/server";
 import { generateCode } from "@/lib/operaciones";
+import { getRol } from "@/lib/auth";
+
+// Tope para columnas integer de Postgres (int4 max ~2.147MM), con margen.
+const MAX_ARS = 2_000_000_000;
 
 // POST /api/operaciones — crea una operación.
-// Requiere admin logueado. La escritura va con service role.
+// Requiere un usuario con rol (moderador o administrador).
+// La escritura va con service role y registra auditoría.
 export async function POST(request: Request) {
   const supabase = createServerSupabase();
   const {
@@ -12,6 +17,12 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+  if (!getRol(user)) {
+    return NextResponse.json(
+      { error: "Tu usuario no tiene rol asignado" },
+      { status: 403 }
+    );
   }
 
   let body: any;
@@ -37,10 +48,10 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  if (!Number.isFinite(monto) || monto < 0) {
+  if (!Number.isFinite(monto) || monto < 0 || monto > MAX_ARS) {
     return NextResponse.json({ error: "Monto inválido" }, { status: 400 });
   }
-  if (!Number.isFinite(fee) || fee < 0) {
+  if (!Number.isFinite(fee) || fee < 0 || fee > MAX_ARS) {
     return NextResponse.json({ error: "Comisión inválida" }, { status: 400 });
   }
 
@@ -58,11 +69,21 @@ export async function POST(request: Request) {
         vendedor_alias,
         monto,
         fee,
+        created_by: user.id,
       })
       .select("id, code")
       .single();
 
     if (!error && data) {
+      // Auditoría: evento de creación (de null -> esperando_entrada).
+      await admin.from("operacion_eventos").insert({
+        operacion_id: data.id,
+        de: null,
+        a: "esperando_entrada",
+        actor_id: user.id,
+        actor_email: user.email ?? null,
+      });
+
       return NextResponse.json({ id: data.id, code: data.code }, { status: 201 });
     }
 

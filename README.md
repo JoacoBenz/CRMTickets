@@ -19,20 +19,32 @@ preguntar.
 | `moderador`     | Solo cargar operaciones y copiar el link/mensaje              |
 
 El rol vive en `app_metadata.role` del usuario de Supabase (el usuario no puede
-editarlo). Un usuario **sin rol asignado es administrador** (así el primer
-usuario funciona sin pasos extra). Para marcar a alguien como moderador, corré
-en el SQL Editor:
+editarlo). Un usuario **sin rol asignado no tiene acceso a ningún módulo** (ve
+la página `/sin-acceso`): así una cuenta creada por fuera nunca obtiene
+permisos por accidente. **Todo usuario, incluido el primero, necesita rol
+explícito.** Se asigna en el SQL Editor:
 
 ```sql
+-- administrador
+update auth.users
+set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb)
+    || '{"role":"administrador"}'::jsonb
+where email = 'admin@ejemplo.com';
+
+-- moderador
 update auth.users
 set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb)
     || '{"role":"moderador"}'::jsonb
 where email = 'moderador@ejemplo.com';
 ```
 
-(Para volverlo administrador: mismo update con `'{"role":"administrador"}'`.)
 El moderador que intenta entrar a `/admin` es redirigido a `/moderador`, y el
 cambio de estados está bloqueado para moderadores también en la API.
+
+> ⚠️ **Desactivá los registros públicos**: Supabase trae el signup por email
+> habilitado por defecto. Andá a **Authentication → Sign In / Up** y
+> deshabilitá *Allow new users to sign up*. Los usuarios se crean solo desde
+> el dashboard.
 
 ## Stack
 
@@ -73,13 +85,20 @@ cancelada → esperando_entrada                        (reabrir)
 - La vista pública muestra **solo**: evento, monto, estado, aliases y fecha de
   actualización. Nada de teléfonos, mails, nombres ni comisión (la comisión es
   un dato interno del panel).
-- **RLS activado**: anon NO puede leer la tabla directamente (evita que alguien
-  con la anon key liste todas las operaciones). La vista pública lee vía el RPC
-  `operacion_publica(uuid)`, que exige el uuid exacto y devuelve solo los campos
-  públicos. Escritura y cambios de estado solo para usuarios autenticados.
-- Los cambios de estado y el alta se hacen vía **Route Handlers con la service role**
-  (`app/api/operaciones/...`), nunca desde el cliente con la anon key. Cada handler
-  verifica que haya un admin logueado antes de escribir.
+- **RLS en deny-all**: la tabla no tiene ninguna policy para `anon` ni
+  `authenticated` — nadie puede leerla ni escribirla directo contra PostgREST,
+  ni siquiera un usuario logueado (no se puede saltar la API con el JWT).
+- La vista pública lee vía el RPC `operacion_publica(uuid)` (security definer),
+  que exige el uuid exacto y devuelve solo los campos públicos. Los paneles y
+  las APIs leen y escriben en el **servidor con la service role**, validando
+  sesión + rol antes de tocar nada.
+- La **máquina de estados también vive en la base**: un trigger de Postgres
+  rechaza cualquier transición inválida, sin importar quién escriba (SQL
+  Editor, scripts, otro servicio).
+- Los cambios de estado usan **update condicional** (`where status = <leído>`):
+  dos clicks simultáneos no se pisan; el que llega tarde recibe 409.
+- **Auditoría**: cada creación y cambio de estado queda registrado en
+  `operacion_eventos` (quién, qué transición, cuándo).
 
 ## Setup local
 
@@ -116,12 +135,12 @@ Abrí http://localhost:3000/admin
 
 1. **Crear proyecto** en https://supabase.com/dashboard → *New project*. Elegí una
    región cercana (ej. São Paulo) y guardá la contraseña de la base.
-2. **Correr las migraciones**: en el dashboard, andá a **SQL Editor → New query**, pegá
-   todo el contenido de [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)
-   y ejecutá (*Run*). Después repetí con
-   [`supabase/migrations/0002_public_read_rpc.sql`](supabase/migrations/0002_public_read_rpc.sql).
-   Esto crea el enum, la tabla, el trigger de `updated_at`, las políticas RLS y el
-   RPC de lectura pública.
+2. **Correr las migraciones EN ORDEN**: en el dashboard, andá a **SQL Editor →
+   New query** y ejecutá una por una:
+   [`0001_init.sql`](supabase/migrations/0001_init.sql) (enum, tabla, trigger de
+   `updated_at`), [`0002_public_read_rpc.sql`](supabase/migrations/0002_public_read_rpc.sql)
+   (RPC de lectura pública) y [`0003_lockdown.sql`](supabase/migrations/0003_lockdown.sql)
+   (RLS deny-all, trigger de transiciones, `created_by` y auditoría).
 3. **(Opcional) Seed**: pegá y ejecutá [`supabase/seed.sql`](supabase/seed.sql) para
    tener 2-3 operaciones de ejemplo.
 4. **Copiar las keys**: **Project Settings → API**. Copiá:
@@ -130,10 +149,11 @@ Abrí http://localhost:3000/admin
    - *service_role* → `SUPABASE_SERVICE_ROLE_KEY` (¡mantenela secreta!)
    Pegalas en `.env.local`.
 5. **Crear el usuario admin**: **Authentication → Users → Add user → Create new user**.
-   Poné email y contraseña, y marcá *Auto Confirm User* (o desactivá la confirmación
-   por email en **Authentication → Providers → Email**). Con esas credenciales entrás
-   a `/admin`.
-6. **Reiniciá** `npm run dev` para tomar las variables y listo: entrá a `/admin`,
+   Poné email y contraseña, y marcá *Auto Confirm User*. Después **asignale el rol**
+   con el SQL de la sección [Roles](#roles) (sin rol no entra a ningún módulo).
+6. **Desactivar signups públicos**: **Authentication → Sign In / Up** →
+   deshabilitá *Allow new users to sign up* (ver sección Roles).
+7. **Reiniciá** `npm run dev` para tomar las variables y listo: entrá a `/admin`,
    creá una operación y abrí su link público con "Ver".
 
 ### Deploy en Vercel
@@ -149,25 +169,39 @@ Abrí http://localhost:3000/admin
 ```
 app/
   page.tsx                       landing
-  op/[id]/page.tsx               página pública (read-only, auto-refresh)
+  op/[id]/page.tsx               página pública (read-only, auto-refresh, RPC)
   admin/page.tsx                 módulo administrador (estados)
   moderador/page.tsx             módulo moderador (carga)
   admin/login/page.tsx           login email/password (redirige según rol)
-  api/operaciones/route.ts       POST crear (ambos roles, service role)
-  api/operaciones/[id]/status/route.ts   PATCH estado (solo admin, service role)
+  sin-acceso/page.tsx            usuarios autenticados sin rol asignado
+  api/operaciones/route.ts       POST crear (requiere rol, service role)
+  api/operaciones/[id]/status/route.ts   PATCH estado (solo admin, update condicional)
 components/
   StatusStub.tsx  ProgressSteps.tsx  StatusChip.tsx  AutoRefresh.tsx  AppHeader.tsx
   admin/  AdminDashboard  NewOperacionForm  OperacionCard  Toast  LogoutButton
   moderador/  ModeradorDashboard
 lib/
   operaciones.ts                 tipos, máquina de estados, labels, colores, helpers
-  auth.ts                        roles (administrador / moderador)
+  operaciones.test.ts            tests de la máquina de estados (npm test)
+  auth.ts                        roles (administrador / moderador / sin rol)
+  urls.ts                        base URL de links públicos + validación de uuid
   supabase/client.ts  supabase/server.ts
 middleware.ts                    refresca sesión, protege /admin y /moderador por rol
 supabase/
-  migrations/0001_init.sql       enum + tabla + trigger + RLS
+  migrations/0001_init.sql       enum + tabla + trigger updated_at
+  migrations/0002_public_read_rpc.sql   RPC de lectura pública por uuid
+  migrations/0003_lockdown.sql   RLS deny-all + trigger transiciones + auditoría
   seed.sql                       datos de ejemplo
 ```
+
+## Tests
+
+```bash
+npm test
+```
+
+Cubren la máquina de estados (`canTransition`, `nextStatus`), el formato de los
+codes y el mensaje de WhatsApp.
 
 ## Alcance (MVP)
 
