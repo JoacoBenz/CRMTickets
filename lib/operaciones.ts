@@ -15,6 +15,9 @@ export type Operacion = {
   vendedor_alias: string | null;
   monto: number;
   fee: number;
+  // Cuenta (alias/CBU) de la que se debita la plata. Dato interno del
+  // panel — nunca se muestra en el link público.
+  cuenta_debitar: string | null;
   status: Status;
   created_at: string;
   updated_at: string;
